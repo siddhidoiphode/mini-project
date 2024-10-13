@@ -18,20 +18,56 @@ from collections import defaultdict
 
 from django.db.models import Sum
 from kitchen.views import kitchen_home
+# def counter_home(request):
+#     confirmed_orders = SubmittedItem.objects.filter(status='confirmed').order_by('tableNumber')
+
+#     # Group orders by table number and calculate totals
+#     orders_by_table = {}
+#     table_totals = {}
+
+#     for order in confirmed_orders:
+#         table_number = order.tableNumber
+#         if table_number not in orders_by_table:
+#             orders_by_table[table_number] = []
+#             table_totals[table_number] = 0
+        
+#         orders_by_table[table_number].append(order)
+#         table_totals[table_number] += order.total_price
+
+#     context = {
+#         'confirmed_orders': orders_by_table,
+#         'table_totals': table_totals,
+#     }
+
+#     return render(request, 'counter/counter_home.html', context)
+
 def counter_home(request):
     confirmed_orders = SubmittedItem.objects.filter(status='confirmed').order_by('tableNumber')
 
-    # Group orders by table number and calculate totals
+    # Group orders by table number and aggregate item quantities
     orders_by_table = {}
     table_totals = {}
 
     for order in confirmed_orders:
         table_number = order.tableNumber
+        
         if table_number not in orders_by_table:
-            orders_by_table[table_number] = []
+            orders_by_table[table_number] = {}
             table_totals[table_number] = 0
         
-        orders_by_table[table_number].append(order)
+        item_name = order.name  # Assuming 'item' is a ForeignKey and 'name' is the field
+        item_quantity = order.quantity
+
+        # If the item already exists for the table, add the quantity; otherwise, set it
+        if item_name in orders_by_table[table_number]:
+            orders_by_table[table_number][item_name]['quantity'] += item_quantity
+        else:
+            orders_by_table[table_number][item_name] = {
+                'quantity': item_quantity,
+                'price': order.total_price
+            }
+        
+        # Update the table total
         table_totals[table_number] += order.total_price
 
     context = {
@@ -40,7 +76,6 @@ def counter_home(request):
     }
 
     return render(request, 'counter/counter_home.html', context)
-
 
 def login_view(request):
     if request.method=='POST':

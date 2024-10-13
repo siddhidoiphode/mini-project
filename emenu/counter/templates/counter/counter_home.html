@@ -11,7 +11,7 @@
                 <div id="tab-1" class="tab-pane fade show p-0 active">
                     <div class="row g-4">
                         <!-- Loop over grouped orders by table number -->
-                        {% for table_number, orders in confirmed_orders.items %}
+                        {% for table_number, items in confirmed_orders.items %}
                         <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
                             <div class="order-item bg-light rounded p-4">
                                 <div class="d-flex align-items-center mb-3">
@@ -28,12 +28,13 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {% for order in orders %}
+                                            <!-- Loop through each item for the current table -->
+                                            {% for item_name, item_data in items.items %}
                                             <tr>
-                                                <td>{{ order.name }}</td>
-                                                <td>{{ order.quantity }}</td>
-                                                <td>${{ order.price }}</td>
-                                                <td>${{ order.total_price }}</td>
+                                                <td>{{ item_name }}</td>
+                                                <td>{{ item_data.quantity }}</td>
+                                                <td>${{ item_data.price }}</td>
+                                                <td>${{ item_data.quantity|floatformat:2 }}</td> <!-- Display total item price -->
                                             </tr>
                                             {% empty %}
                                             <tr>
@@ -43,8 +44,7 @@
                                             <!-- Total Bill Row -->
                                             <tr class="table-info">
                                                 <td colspan="3"><strong>Total Bill</strong></td>
-                                                <td><strong>${{ table_totals.table_number }}</strong></td>
-                                            </tr>
+                                                <td><strong>{{ table_totals.table_number|floatformat:2 }}</strong></td>                                            </tr>                                            
                                         </tbody>
                                     </table>
                                 </div>
@@ -52,6 +52,7 @@
                         </div>
                         {% endfor %}
                     </div>
+                    
                 </div>
             </div>
         </div>

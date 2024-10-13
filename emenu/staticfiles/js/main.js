@@ -117,3 +117,75 @@
     
 })(jQuery);
 
+document.addEventListener('DOMContentLoaded', function () {
+    var tableModal = document.getElementById('tableModal');
+    var modalBodyContent = document.getElementById('modalBodyContent');
+
+    tableModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Button that triggered the modal
+        var table_number = button.getAttribute('data-table-number'); // Extract info from data-* attributes
+        
+        fetch(`/counter/api/get_table_receipt/${table_number}/`)
+            // .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status); // Log status
+                return response.json();
+            })
+            .then(data => {
+                console.log('Data received:', data);
+                if (data.error) {
+                    modalBodyContent.innerHTML = `<p>${data.error}</p>`;
+                } else {
+                    const now = new Date();
+                    const currentDate = now.toLocaleDateString('en-US', { 
+                        year: 'numeric', month: 'long', day: 'numeric' 
+                    });
+                    var receiptHTML = `
+                        <div class="receipt-header">
+                            <h1>Restaurant Name</h1>
+                            <p>1234 Restaurant St, Food City</p>
+                            <p>Phone: (123) 456-7890</p>
+                        </div>
+                        <div class="customer-info">
+                            
+                            <p><strong>Table No:</strong> ${table_number}</p>
+                            <p><strong>Date:</strong> ${currentDate}</p>
+                        </div>
+                        <table class="order-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Qty</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.items.map(item => `
+                                    <tr>
+                                        <td>${item.item}</td>
+                                        <td>${item.qty}</td>
+                                        <td>${item.price}</td>
+                                        <td>${item.total}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <div class="total-section">
+                            <p><strong>Subtotal:</strong> ${data.subtotal}</p>
+                            <p><strong>Tax (8%):</strong> ${data.tax}</p>
+                            <p><strong>Total:</strong> ${data.total}</p>
+                        </div>
+                        <div class="receipt-footer">
+                            <p>Thank you for dining with us!</p>
+                            <p>Visit Again!</p>
+                        </div>
+                    `;
+                    modalBodyContent.innerHTML = receiptHTML;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching receipt data:', error);
+            });
+    });
+});
