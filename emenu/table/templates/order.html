@@ -98,9 +98,9 @@
     </div>
 </div>
 
-<div class="total-bill">
+{% comment %} <div class="total-bill">
     <h3>Total Bill: ${{ total_bill }}</h3>
-</div>
+</div> {% endcomment %}
 
  <form action="{% url 'submit_order' %}" method="POST">
     {% csrf_token %}
