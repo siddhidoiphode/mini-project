@@ -154,17 +154,39 @@ def generate_bill(request, table_number):
     # Get all confirmed items for the specific table
     confirmed_items = SubmittedItem.objects.filter(tableNumber=table_number, status='confirmed')
 
+    # Dictionary to store item names and their aggregated quantity and total price
+    order_summary = defaultdict(lambda: {'quantity': 0, 'total_price': 0})
+
+    # Aggregate items by name
+    for item in confirmed_items:
+        if item.name in order_summary:
+            order_summary[item.name]['quantity'] += item.quantity
+            order_summary[item.name]['total_price'] += item.total_price
+        else:
+            order_summary[item.name]['quantity'] = item.quantity
+            order_summary[item.name]['total_price'] = item.total_price
+
+    # Prepare data to return as JSON
+    orders = [
+        {
+            'item_name': item_name,
+            'quantity': details['quantity'],
+            'price': details['total_price'] / details['quantity'],  # Average price per item
+            'total_price': details['total_price']
+        }
+        for item_name, details in order_summary.items()
+    ]
+
     # Calculate total bill amount
-    total_bill = sum(item.total_price for item in confirmed_items)
+    total_amount = sum(item['total_price'] for item in orders)
 
-    # Pass the items and total to the template for display
-    context = {
-        'confirmed_items': confirmed_items,
-        'total_bill': total_bill,
-        'table_number': table_number,
+    # Return the response as JSON
+    data = {
+        'orders': orders,
+        'total_amount': total_amount
     }
-    return render(request, 'counter/counter_home.html', context)
 
+    return JsonResponse(data)
 
 from django.shortcuts import render
 from .models import SubmittedItem

@@ -39,7 +39,6 @@
     </div>
   </div>
   
-
   <script>
     document.addEventListener('DOMContentLoaded', function () {
         const tableModal = new bootstrap.Modal(document.getElementById('tableModal'));
@@ -50,43 +49,47 @@
                 const table_number = this.getAttribute('data-table-number');
                 
                 // Fetch the bill data for the selected table
-                fetch(`/counter/bill/${table_number}/`)  // Adjust the URL to match your route
+                fetch(`/counter/bill/${table_number}/`)  // URL where table_number is passed
                     .then(response => response.json())
                     .then(data => {
                         // Update the modal body with the bill details
-                        modalBodyContent.innerHTML = `
-                            <h5>Bill for Table ${table_number}</h5>
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Item Name</th>
-                                        <th>Quantity</th>
-                                        <th>Price</th>
-                                        <th>Total Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${data.orders.map(order => `
+                        if (data.error) {
+                            modalBodyContent.innerHTML = `<p>${data.error}</p>`;
+                        } else {
+                            modalBodyContent.innerHTML = `
+                                <h5>Bill for Table ${table_number}</h5>
+                                <table class="table table-bordered">
+                                    <thead>
                                         <tr>
-                                            <td>${order.item_name}</td>
-                                            <td>${order.quantity}</td>
-                                            <td>${order.price}</td>
-                                            <td>${order.total_price}</td>
+                                            <th>Item Name</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Total Price</th>
                                         </tr>
-                                    `).join('')}
-                                    <tr class="table-info">
-                                        <td colspan="3"><strong>Total Bill</strong></td>
-                                        <td><strong>${data.total_amount}</strong></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        `;
+                                    </thead>
+                                    <tbody>
+                                        ${data.orders.map(order => `
+                                            <tr>
+                                                <td>${order.item_name}</td>
+                                                <td>${order.quantity}</td>
+                                                <td>${order.price}</td>
+                                                <td>${order.total_price}</td>
+                                            </tr>
+                                        `).join('')}
+                                        <tr class="table-info">
+                                            <td colspan="3"><strong>Total Bill</strong></td>
+                                            <td><strong>${data.total_amount}</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            `;
+                        }
                         tableModal.show();
                     })
                     .catch(error => console.error('Error fetching bill data:', error));
             });
         });
     });
-</script>
-
+    </script>
+    
 {% endblock %}
