@@ -26,6 +26,7 @@ urlpatterns = [
     path('logout/',views.logout_view,name='logout_view'),
 
     path('bill/<int:table_number>/', views.generate_bill, name='generate_bill'),
+    path('delete_orders/<int:table_number>/', views.delete_table_orders, name='delete_table_orders'),
 
     path('recent_tables/', views.recent_tables_view, name='recent_tables'),  # No parameters
     # path('generate_bill/<int:table_number>/', views.generate_bill, name='generate_bill'),

@@ -21,6 +21,7 @@ urlpatterns = [
     path('decrease/<int:item_id>/', views.decrease_quantity, name='decrease_quantity'),
     path('submit_all/', views.submit_all_items, name='submit_all_items'),
     path('set_table_number/', views.set_table_number, name='set_table_number'),
+    # path('generate_qr/', views.generate_qr, name='generate_qr'),
 
 ]
 

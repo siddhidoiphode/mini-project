@@ -208,3 +208,17 @@ def generate_bill_view(request, table_number):
         'table_number': table_number,
     }
     return render(request, 'counter/bill_view.html', context)
+
+from django.views.decorators.http import require_http_methods
+
+
+@require_http_methods(["DELETE"])
+def delete_table_orders(request, table_number):
+    # Get all confirmed items for the specific table and delete them
+    confirmed_items = SubmittedItem.objects.filter(tableNumber=table_number, status='confirmed')
+    
+    if confirmed_items.exists():
+        confirmed_items.delete()  # Delete all items for this table
+        return JsonResponse({'message': 'Orders deleted successfully'}, status=200)
+    else:
+        return JsonResponse({'error': 'No orders found for this table'}, status=404)

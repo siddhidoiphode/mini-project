@@ -9,6 +9,11 @@ from .models import FoodItem, NotSubmittedItem, SubmittedItem, Category
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+# # import qrcode
+# from io import BytesIO
+# from django.http import HttpResponse
+# from django.shortcuts import redirect
+
 
 def category_detail(request, category_id):
     category = get_object_or_404(Category, id=category_id)
@@ -304,3 +309,24 @@ def save_table_number(request):
     return redirect('kitchen_home')  
 
 
+# Import necessary modules
+
+# import qrcode
+# # Function to generate QR code
+# def generate_qr(request):
+#     # URL for the table_home page
+#     table_home_url = request.build_absolute_uri('/table_home/')
+    
+#     # Generate QR code
+#     qr = qrcode.QRCode(version=1, box_size=10, border=5)
+#     qr.add_data(table_home_url)
+#     qr.make(fit=True)
+    
+#     # Create image
+#     img = qr.make_image(fill='black', back_color='white')
+#     buffer = BytesIO()
+#     img.save(buffer, 'PNG')
+#     buffer.seek(0)
+    
+#     # Return QR image as HTTP response
+#     return HttpResponse(buffer, content_type='image/png')

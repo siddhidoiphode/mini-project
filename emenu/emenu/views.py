@@ -35,3 +35,29 @@ def table_home(request, id=None):
         SubmittedItem.objects.create(tableNumber=table_number, )  # Save other necessary fields
         print(f"Current Table Number: {table_number}")
     return render(request, 'table_home.html', context)
+
+
+# Import necessary modules
+import qrcode
+from io import BytesIO
+from django.http import HttpResponse
+from django.shortcuts import redirect
+
+# Function to generate QR code
+def generate_qr(request):
+    # URL for the table_home page
+    table_home_url = request.build_absolute_uri('/table_home/')
+    
+    # Generate QR code
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(table_home_url)
+    qr.make(fit=True)
+    
+    # Create image
+    img = qr.make_image(fill='black', back_color='white')
+    buffer = BytesIO()
+    img.save(buffer, 'PNG')
+    buffer.seek(0)
+    
+    # Return QR image as HTTP response
+    return HttpResponse(buffer, content_type='image/png')

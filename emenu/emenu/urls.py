@@ -24,9 +24,11 @@ from django.conf import settings
 urlpatterns = [
     path('<int:id>/', views.table_home, name='table_home'),
     # path('', views.home, name='home'),
-    path('',views.table_home,name='table_home'),
+    path('',views.generate_qr,name='generate_qr'),
+    path('table_home/',views.table_home,name='table_home'),
     path('admin/',admin.site.urls),
     path('counter/',include('counter.urls')),
     path('kitchen/',include('kitchen.urls')),
     path('table/',include('table.urls')),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

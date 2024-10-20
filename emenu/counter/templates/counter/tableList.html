@@ -38,21 +38,21 @@
       </div>
     </div>
   </div>
-  
   <script>
     document.addEventListener('DOMContentLoaded', function () {
         const tableModal = new bootstrap.Modal(document.getElementById('tableModal'));
         const modalBodyContent = document.getElementById('modalBodyContent');
-        
+        let currentTableNumber;  // Store the current table number globally
+    
+        // Fetch the bill data when a table is clicked
         document.querySelectorAll('[data-bs-toggle="modal"]').forEach((element) => {
             element.addEventListener('click', function () {
                 const table_number = this.getAttribute('data-table-number');
-                
-                // Fetch the bill data for the selected table
-                fetch(`/counter/bill/${table_number}/`)  // URL where table_number is passed
+                currentTableNumber = table_number;  // Save the current table number for deletion
+    
+                fetch(`/counter/bill/${table_number}/`)  // Fetch the bill for the selected table
                     .then(response => response.json())
                     .then(data => {
-                        // Update the modal body with the bill details
                         if (data.error) {
                             modalBodyContent.innerHTML = `<p>${data.error}</p>`;
                         } else {
@@ -88,6 +88,28 @@
                     })
                     .catch(error => console.error('Error fetching bill data:', error));
             });
+        });
+    
+        // Handle deletion when the "Done" button is clicked
+        document.getElementById('doneButton').addEventListener('click', function () {
+            if (currentTableNumber) {
+                // Send delete request for the current table's orders
+                fetch(`/counter/delete_orders/${currentTableNumber}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',  // Include CSRF token for security
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert(`Orders for Table ${currentTableNumber} have been finished.`);
+                        tableModal.hide();  // Close the modal
+                    } else {
+                        console.error('Error finishing orders.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
         });
     });
     </script>
