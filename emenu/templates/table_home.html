@@ -86,18 +86,29 @@
         </button>
 
 
+
+        {% comment %} <div class="collapse navbar-collapse" id="navbarCollapse" style="margin-bottom: 0; padding-bottom: 0; margin-top: 0px;">
+            <div class="navbar-nav ms-auto py-0 pe-4" style="padding-bottom: 18px; margin-top: 0px;">
+                <a href="{% url 'table_home' %}" class="nav-item nav-link {% if request.path == '/' %}active{% endif %}">Home</a>
+                <a href="{% url 'bill' %}" class="nav-item nav-link {% if request.path == '/bill/' %}active{% endif %}">Bill</a>
+                <a href="{% url 'order' %}" class="nav-item nav-link {% if request.path == '/order/' %}active{% endif %}">Order</a>
+                <div class="header">
+                    <div class="table-number-display" id="table_numberDisplay">Table: N/A</div>  <!-- Placeholder text -->
+                </div>
+            </div>
+         {% endcomment %}
      
          <div class="collapse navbar-collapse" id="navbarCollapse" style="margin-bottom: 0; padding-bottom: 0; margin-top: 0px;">
             <div class="navbar-nav ms-auto py-0 pe-4 d-flex align-items-center" style="padding-bottom: 18px; margin-top: 0px;">
                 <a href="{% url 'table_home' %}" class="nav-item nav-link {% if request.path == '/' %}active{% endif %}">Home</a>
-                <a href="{% url 'bill' %}" class="nav-item nav-link {% if request.path == '/bill/' %}active{% endif %}">
+                {% comment %} <a href="{% url 'bill' %}" class="nav-item nav-link {% if request.path == '/bill/' %}active{% endif %}">
                     <img src="{% static "img/bill.png" %}" alt="Bill Icon"style="width: 50px; height: 50px; margin-right: 5px;">
                      Bill
-                </a>
+                </a> {% endcomment %}
                 {% comment %} <a href="{% url 'order' %}" class="nav-item nav-link {% if request.path == '/order/' %}active{% endif %}">Order</a> {% endcomment %}
                 <a href="{% url 'order' %}" class="nav-item nav-link {% if request.path == '/order/' %}active{% endif %}">
                     <img src="{% static 'img/restaurant.png' %}" alt="Cart Icon" style="width: 50px; height: 50px; margin-right: 5px;">
-                     My Dish
+                     My Orders
                   </a>
                                   
                 <div class="table-number-display ms-auto " id="table_numberDisplay">Table: </div> <!-- Table number aligned to the right -->
@@ -304,16 +315,16 @@
 <!-- Finish Button to delete the item and table number to dstart new session -->
 
 
-<form action="{% url 'cancel_item_finish' %}" method="POST" style="margin-left: 5px;" onsubmit="return finishSession();">
+{% comment %} <form action="{% url 'cancel_item_finish' %}" method="POST" style="margin-left: 5px;" onsubmit="return finishSession();">
     {% csrf_token %}
     <button type="submit">Finish</button>
-</form>
+</form> {% endcomment %}
 
-{% if table_number %}
+{% comment %} {% if table_number %}
 <p>Current Table Number: {{ table_number }}</p>
 {% else %}
 <p>No table selected.</p>
-{% endif %}
+{% endif %} {% endcomment %}
 
 <!-- Include this in every page -->
 <script>
@@ -460,7 +471,7 @@
     }
 
      {% endcomment %}
-     function finishSession() {
+     {% comment %} function finishSession() {
         // Ask for confirmation
         if (confirm("Are you sure you want to finish?")) {
             // Clear local storage
@@ -480,7 +491,7 @@
         }
         // Prevent form submission if the user cancels
         return false;
-    }
+    } {% endcomment %}
 </script>
 
 <style>
@@ -704,109 +715,9 @@
     </div>
 </div>
 
-
 {% endblock %}
 
-<div id="live-cart">
-    <!-- Live cart will be displayed here -->
-    <h2>Cart</h2>
-    <ul id="cart-items"></ul>
-    <div class="cart-total">
-        <strong>Total:</strong> <span id="cart-total">0</span>
-    </div>
-    <button id="submit-order" class="btn btn-success">Submit & Finalize</button>
-</div>
 
-<!-- Modal for confirming order -->
-<div id="order-confirmation-modal" class="modal">
-    <div class="modal-content">
-        <h4>Order Summary</h4>
-        <ul id="order-summary-items"></ul>
-        <button id="finalize-order" class="btn btn-primary">Confirm & Submit</button>
-        <button id="cancel-order" class="btn btn-danger">Cancel</button>
-    </div>
-</div>
-
-<!-- Code to list menu items -->
-<div class="menu-item">
-    <h3>{{ item.name }}</h3>
-    <p>Price: {{ item.price }}</p>
-    <input type="number" id="quantity-{{ item.id }}" value="1" min="1">
-    <button onclick="addToCart({{ item.id }}, '{{ item.name }}', {{ item.price }})">Add to Cart</button>
-</div>
-<script>
-    let cart = [];
-    
-    function addToCart(itemId, itemName, itemPrice) {
-        let quantity = document.getElementById(`quantity-${itemId}`).value;
-        let existingItem = cart.find(item => item.id === itemId);
-    
-        if (existingItem) {
-            existingItem.quantity += parseInt(quantity);
-        } else {
-            cart.push({ id: itemId, name: itemName, price: itemPrice, quantity: parseInt(quantity) });
-        }
-        updateCart();
-    }
-    
-    function updateCart() {
-        let cartItemsElement = document.getElementById('cart-items');
-        let cartTotalElement = document.getElementById('cart-total');
-        let total = 0;
-        
-        cartItemsElement.innerHTML = '';
-        cart.forEach(item => {
-            total += item.price * item.quantity;
-            cartItemsElement.innerHTML += `<li>
-                ${item.name} - ${item.quantity} @ ${item.price} each
-                <button onclick="removeFromCart(${item.id})">Remove</button>
-            </li>`;
-        });
-        cartTotalElement.innerText = total.toFixed(2);
-    }
-    
-    function removeFromCart(itemId) {
-        cart = cart.filter(item => item.id !== itemId);
-        updateCart();
-    }
-    
-    document.getElementById('submit-order').addEventListener('click', function() {
-        showConfirmation();
-    });
-    
-    function showConfirmation() {
-        let orderSummaryItems = document.getElementById('order-summary-items');
-        orderSummaryItems.innerHTML = '';
-        cart.forEach(item => {
-            orderSummaryItems.innerHTML += `<li>${item.name} - ${item.quantity}</li>`;
-        });
-        // Open the confirmation modal
-        document.getElementById('order-confirmation-modal').style.display = 'block';
-    }
-    
-    document.getElementById('finalize-order').addEventListener('click', function() {
-        finalizeOrder();
-    });
-    
-    function finalizeOrder() {
-        // Submit the order to the server
-        fetch('/submit-order/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ table_number: 1, items: cart })
-        }).then(response => {
-            return response.json();
-        }).then(data => {
-            if (data.success) {
-                // Clear the cart
-                cart = [];
-                updateCart();
-                alert('Order submitted successfully!');
-            }
-        });
-    }
-    </script>
-    
 
 
 

@@ -330,3 +330,46 @@ def save_table_number(request):
     
 #     # Return QR image as HTTP response
 #     return HttpResponse(buffer, content_type='image/png')
+# views.py
+from django.http import JsonResponse
+from .models import NotSubmittedItem, SubmittedItem
+
+# def auto_submit_item(request, item_id):
+#     try:
+#         not_submitted_item = NotSubmittedItem.objects.get(fooditem=item_id)
+        
+#         # Create a new SubmittedItem from the NotSubmittedItem
+#         submitted_item = SubmittedItem.objects.create(
+#             food_item=not_submitted_item.food_item,
+#             name=not_submitted_item.name,
+#             price=not_submitted_item.price,
+#             image=not_submitted_item.image,
+#             quantity=not_submitted_item.quantity,
+#             total_price=not_submitted_item.price * not_submitted_item.quantity,
+#             tableNumber=not_submitted_item.tableNumber,
+#             status='submitted'
+#         )
+        
+#         # Remove the item from NotSubmittedItem
+#         not_submitted_item.delete()
+        
+#         return JsonResponse({'success': True, 'submitted_item_id': submitted_item.food_item})
+#     except NotSubmittedItem.DoesNotExist:
+#         return JsonResponse({'success': False, 'error': 'Item not found'}, status=404)
+
+def submit_item(request, item_id):
+    # Fetch the item from NotSubmitted and delete it after transferring
+    item = get_object_or_404(NotSubmittedItem, id=item_id)
+
+    # Move item details to Submitted model
+    SubmittedItem.objects.create(
+        table_number=item.tableNumber,
+        item_name=item.name,
+        quantity=item.quantity,
+        price=item.price
+    )
+
+    # Remove the item from NotSubmitted
+    item.delete()
+
+    return JsonResponse({'status': 'success', 'message': 'Item submitted successfully.'})

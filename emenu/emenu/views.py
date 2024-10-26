@@ -61,3 +61,10 @@ def generate_qr(request):
     
     # Return QR image as HTTP response
     return HttpResponse(buffer, content_type='image/png')
+
+
+
+def remove_order_item(request, order_id):
+    order = get_object_or_404(SubmittedItem, id=order_id)
+    order.delete()
+    return redirect('kitchen_home')  

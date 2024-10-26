@@ -1,5 +1,6 @@
 
 {% extends 'table_home.html'%} 
+{% comment %} 
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -98,9 +99,9 @@
     </div>
 </div>
 
-{% comment %} <div class="total-bill">
+<div class="total-bill">
     <h3>Total Bill: ${{ total_bill }}</h3>
-</div> {% endcomment %}
+</div> 
 
  <form action="{% url 'submit_order' %}" method="POST">
     {% csrf_token %}
@@ -201,4 +202,185 @@ function FinalOrder(itemId, itemName, itemPrice) {
 {% endblock content %}
 
 
+</html> {% endcomment %}
+{% comment %} {% extends 'table_home.html' %} {% endcomment %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+{% block header %}
+    <!-- The header will be inherited from index.html -->
+{% endblock header %}
+
+{% block content %}
+
+<!-- Section for Not Submitted Items with a Timer -->
+<div class="not-submitted-section" style="margin: 10px 50px;">
+    <h3 style="background-color: #fc6b3f; color: white; padding: 8px 15px; font-size: 24px; border-radius: 5px;">
+        Not Submitted
+    </h3>
+
+    <div class="tab-content">
+        <div class="row g-4" id="not-submitted-list">
+            {% for item in not_submitted_items %}
+                <div class="col-lg-6" id="item-{{ item.id }}">
+                    <div class="d-flex align-items-center p-3 shadow-sm" style="border: 1px solid #ccc; border-radius: 8px;">
+                        <img class="rounded" src="{{ item.image }}" alt="{{ item.name }}" style="width: 80px; height: 80px;">
+                        <div class="ms-3 w-100">
+                            <h5 style="color: #000; font-size: 20px;">{{ item.name }}</h5>
+                            <p style="color: #555;">Quantity: <span id="quantity-{{ item.id }}">{{ item.quantity }}</span></p>
+                            <p style="color: #555;">Price: ${{ item.price }}</p>
+                            <p style="color: #555;">Time Left: <span id="timer-{{ item.id }}">02:00</span></p>
+                        </div>
+                        <div class="action-buttons d-flex flex-column ms-3">
+                            <button type="button" class="btn btn-danger btn-sm mb-1 decrease-btn" data-id="{{ item.id }}" style="width: 50px;">-</button>
+                            <button type="button" class="btn btn-success btn-sm increase-btn" data-id="{{ item.id }}" style="width: 50px;">+</button>
+                            <form action="{% url 'cancel_item' item.id %}" method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning btn-sm mt-1">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <li>No items selected</li>
+            {% endfor %}
+        </div>
+        
+        <!-- Submit All Button for Not Submitted Items -->
+        <form action="{% url 'submit_order' %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary mt-3" id="submit-all">Submit All</button>
+        </form>
+    </div>
+</div>
+
+<!-- Section for Submitted Items -->
+<div class="submitted-section" style="margin: 20px 50px;">
+    <h3 style="background-color: #92ee50; color: white; padding: 8px 15px; font-size: 24px; border-radius: 5px;">
+        Submitted
+    </h3>
+
+    <div class="tab-content">
+        <div class="row g-4" id="submitted-list">
+            {% for item in submitted_items %}
+                <div class="col-lg-6">
+                    <div class="d-flex align-items-center p-3 shadow-sm" style="border: 1px solid #ccc; border-radius: 8px;">
+                        <img class="rounded" src="{{ item.image }}" alt="{{ item.name }}" style="width: 80px; height: 80px;">
+                        <div class="ms-3 w-100">
+                            <h5 style="color: #000; font-size: 20px;">{{ item.name }}</h5>
+                            <p style="color: #555;">Quantity: {{ item.quantity }}</p>
+                            <p style="color: #555;">Price: ${{ item.price }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <li>No items submitted</li>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Example: Timer-based submission for items
+        document.querySelectorAll('.submit-button').forEach(button => {
+            button.addEventListener('click', function () {
+                let itemId = this.dataset.itemId;
+    
+                // Send AJAX request to Django view to move item to Submitted
+                fetch(`/submit_item/${itemId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Remove item from DOM or update UI
+                        document.getElementById(`item-${itemId}`).remove();
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    });
+    </script>
+    
+<!-- JavaScript for Individual Timers and Quantity Update -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize individual timers for each item
+        const itemTimers = {};
+
+        document.querySelectorAll('[id^="timer-"]').forEach(timerElement => {
+            const itemId = timerElement.id.split('-')[1];
+            let timeRemaining = 120; // 2 minutes in seconds
+
+            itemTimers[itemId] = setInterval(() => {
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                timeRemaining--;
+
+                if (timeRemaining < 0) {
+                    clearInterval(itemTimers[itemId]);
+                    document.querySelector(`#item-${itemId}`).remove(); // Remove item when timer reaches 0
+                }
+            }, 1000);
+        });
+
+        // Event listeners for quantity increase and decrease buttons
+        document.querySelectorAll('.increase-btn, .decrease-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-id');
+                const isIncrease = this.classList.contains('increase-btn');
+                
+                fetch(`/table/${isIncrease ? 'increase' : 'decrease'}/${itemId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ item_id: itemId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector(`#quantity-${itemId}`).textContent = `Quantity: ${data.new_quantity}`;
+                        if (data.new_quantity === 0) {
+                            document.querySelector(`#item-${itemId}`).remove();
+                        }
+                    } else {
+                        console.error("Failed to update quantity");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Styling for the custom alert box */
+    .custom-alert {
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #ffffff;
+        padding: 20px;
+        color: #000000;
+        font-weight: 600;
+        border: 2px solid rgb(25, 77, 250);
+        border-radius: 4px;
+        font-size: 16px;
+        z-index: 9999;
+    }
+</style>
+
+{% endblock content %}
 </html>

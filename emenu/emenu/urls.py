@@ -30,5 +30,5 @@ urlpatterns = [
     path('counter/',include('counter.urls')),
     path('kitchen/',include('kitchen.urls')),
     path('table/',include('table.urls')),
-    
+    path('remove_order_item/',views.remove_order_item,name='remove_order_item'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

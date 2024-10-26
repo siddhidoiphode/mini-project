@@ -22,6 +22,9 @@ urlpatterns = [
     path('submit_all/', views.submit_all_items, name='submit_all_items'),
     path('set_table_number/', views.set_table_number, name='set_table_number'),
     # path('generate_qr/', views.generate_qr, name='generate_qr'),
+    # path('auto_submit/<int:item_id>/', views.auto_submit_item, name='auto_submit_item'),
+    path('submit_item/<int:item_id>/', views.submit_item, name='submit_item'),
+
 
 ]
 

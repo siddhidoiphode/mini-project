@@ -35,8 +35,7 @@ class NotSubmittedItem(models.Model):
             f"Table Number: {self.tableNumber}, "
             f"Quantity: {self.quantity}"
         )
-from datetime import timedelta
-from django.utils import timezone
+
 # Model to store submitted food items for billing
 class SubmittedItem(models.Model):
     food_item = models.ForeignKey('FoodItem', on_delete=models.CASCADE)
@@ -48,8 +47,6 @@ class SubmittedItem(models.Model):
     tableNumber = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=10, default='pending')  # Default to pending
     created_at = models.DateTimeField(auto_now_add=True)  # New field to track creation time
-    can_edit_until = models.DateTimeField(default=timezone.now() + timedelta(minutes=2))
-
 
     def save(self, *args, **kwargs):
         # Automatically calculate total price on save
