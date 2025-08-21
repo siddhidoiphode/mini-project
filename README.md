@@ -37,6 +37,7 @@ The Mini Food Ordering System is a **web-based platform** designed to streamline
 
 
 
+
 ## 📸 Screenshots
 
 ### 🍽️ Table User
@@ -51,8 +52,6 @@ The Mini Food Ordering System is a **web-based platform** designed to streamline
 ### 💰 Counter User
 ![Counter User Screenshot](screenshots/counter1.png)  
 ![Counter User Screenshot](screenshots/counter2.png)  
-
----
 
 ## ⚡ How to Run Locally
 
