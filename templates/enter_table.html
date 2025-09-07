@@ -1,0 +1,8 @@
+{% load static %}
+<form method="POST" action="{% url 'set_table_number' %}">
+  {% csrf_token %}
+  <label>Enter Table Number:</label>
+  <input type="number" name="table_number" required>
+  <button type="submit">Submit</button>
+</form>
+
