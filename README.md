@@ -58,7 +58,7 @@ The Mini Food Ordering System is a **web-based platform** designed to streamline
 
 ```bash
 # Clone repo
-git clone https://github.com/Rutujakodag1/miniProject.git
+git clone https://github.com/siddhidoiphode/mini-project.git
 cd miniProject
 
 # Create virtual environment
